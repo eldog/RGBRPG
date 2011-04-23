@@ -1,4 +1,4 @@
-package com.muddyfox.rgbrpg;
+package com.muddyfox.rgbrpg.ui;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -16,8 +16,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
-import com.muddyfox.rgbrpg.R;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -33,9 +31,14 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.muddyfox.rgbrpg.AccelerometerListener;
+import com.muddyfox.rgbrpg.DialogManager;
+import com.muddyfox.rgbrpg.GameTimerController;
+import com.muddyfox.rgbrpg.R;
+
 /** Creates a new Time Challenge Game
  **/
-public class TimeChallenge extends Activity
+public class TimeChallengeActivity extends Activity
 {
     private static final int HIGH_SCORE_RESET_ID = Menu.FIRST;
     private static final int NEW_GAME_ID = HIGH_SCORE_RESET_ID + 2;
@@ -143,7 +146,7 @@ public class TimeChallenge extends Activity
         setContentView(R.layout.time_challenge_layout);
 
         currentScore = 0;
-        myView = (RGBRPGview) findViewById(R.id.timeChallengeView);
+        myView = (BattleView) findViewById(R.id.timeChallengeView);
 
         timeDisplay = (TextView) findViewById(R.id.timeChallengeTimer);
         currentScoreDisplay = (TextView) findViewById(R.id.timeChallengeScore);
@@ -230,7 +233,7 @@ public class TimeChallenge extends Activity
             {
                 isInGame = true;
                 // keep playing!
-                myView.setup();
+                myView.reset();
                 startGame();
             }
             Log.d("HERE", "Here I am at the END");
@@ -344,7 +347,7 @@ public class TimeChallenge extends Activity
                 scoredata[3]);
     }
 
-    private RGBRPGview myView;
+    private BattleView myView;
 
     public static boolean isInGame = false;
 
@@ -388,7 +391,7 @@ public class TimeChallenge extends Activity
         private HttpResponse response;
 
         private final ProgressDialog dialog = new ProgressDialog(
-                TimeChallenge.this);
+                TimeChallengeActivity.this);
 
         protected void onPreExecute()
         {
@@ -448,7 +451,7 @@ public class TimeChallenge extends Activity
             }
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
             {
-            	Toast error = Toast.makeText(TimeChallenge.this, "Error Whilst Posting: " + response.getStatusLine().getReasonPhrase(), Toast.LENGTH_LONG);
+            	Toast error = Toast.makeText(TimeChallengeActivity.this, "Error Whilst Posting: " + response.getStatusLine().getReasonPhrase(), Toast.LENGTH_LONG);
             	error.show();
             }
             dialogManager.replayDialog(currentScore, true);

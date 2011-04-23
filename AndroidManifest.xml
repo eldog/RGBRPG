@@ -5,7 +5,7 @@
       <uses-permission android:name="android.permission.VIBRATE" />
       <uses-permission android:name="android.permission.INTERNET" />
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" android:debuggable="true" android:enabled="true">
-        <activity android:name=".MainMenu"
+        <activity android:name=".ui.MainMenuActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait">
             <intent-filter>
@@ -13,24 +13,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".TimeChallenge"
+        <activity android:name=".ui.TimeChallengeActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
                   android:launchMode="singleTask">
             
         </activity>
-        <activity android:name=".BattleGame"
+        <activity android:name=".ui.BattleGameActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
                   android:launchMode="singleTask">
             
         </activity>
-        <activity android:name=".EnduranceGame"
+        <activity android:name=".ui.EnduranceGameActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
                   android:launchMode="singleTask">
         </activity>
-        <activity android:name=".HighScore"
+        <activity android:name=".ui.HighScoreActivity"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
                   android:launchMode="singleTask">

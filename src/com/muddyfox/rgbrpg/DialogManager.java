@@ -1,5 +1,7 @@
 package com.muddyfox.rgbrpg;
 
+import com.muddyfox.rgbrpg.ui.TimeChallengeActivity;
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,10 +9,10 @@ import android.widget.EditText;
 
 public class DialogManager
 {
-    private TimeChallenge mGame;
+    private TimeChallengeActivity mGame;
     private Context c;
 
-    public DialogManager(TimeChallenge game, Context c)
+    public DialogManager(TimeChallengeActivity game, Context c)
     {
         this.mGame = game;
         this.c = c;

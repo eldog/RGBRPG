@@ -2,6 +2,8 @@ package com.muddyfox.rgbrpg;
 
 import java.util.List;
 
+import com.muddyfox.rgbrpg.ui.TimeChallengeActivity;
+
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -16,7 +18,7 @@ public class AccelerometerListener implements SensorEventListener
 	private Sensor sensor;
 	private long lastUpdate = -1;
 	private long currentTime = -1;
-	private TimeChallenge parent;
+	private TimeChallengeActivity parent;
 
 	private float last_x, last_y, last_z;
 	private float current_x, current_y, current_z, currenForce;
@@ -25,7 +27,7 @@ public class AccelerometerListener implements SensorEventListener
 	private final int DATA_Y = SensorManager.DATA_Y;
 	private final int DATA_Z = SensorManager.DATA_Z;
 
-	public AccelerometerListener(TimeChallenge parent)
+	public AccelerometerListener(TimeChallengeActivity parent)
 	{
 
 		// this.subscriber = subscriber;
@@ -87,7 +89,7 @@ public class AccelerometerListener implements SensorEventListener
 				// Device has been shaken now go on and do something
 				// you could now inform the parent activity ...
 
-				if (!TimeChallenge.isInGame)
+				if (!TimeChallengeActivity.isInGame)
 				{
 					this.stop();
 					parent.checkScore();

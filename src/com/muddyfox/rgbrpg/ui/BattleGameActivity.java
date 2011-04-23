@@ -1,14 +1,13 @@
-package com.muddyfox.rgbrpg;
-
-import com.muddyfox.rgbrpg.R;
-import com.muddyfox.rgbrpg.RGBRPGview;
+package com.muddyfox.rgbrpg.ui;
 
 import android.app.Activity;
 import android.os.Bundle;
 
-public class BattleGame extends Activity
+import com.muddyfox.rgbrpg.R;
+
+public class BattleGameActivity extends Activity
 {
-	RGBRPGview mBattleView;
+	BattleView mBattleView;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -16,7 +15,7 @@ public class BattleGame extends Activity
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.battle_layout);
-		mBattleView = (RGBRPGview) findViewById(R.id.rgbrpgview);
+		mBattleView = (BattleView) findViewById(R.id.rgbrpgview);
 		
 	}
 

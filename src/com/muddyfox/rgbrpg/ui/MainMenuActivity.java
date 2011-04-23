@@ -1,6 +1,4 @@
-package com.muddyfox.rgbrpg;
-
-import com.muddyfox.rgbrpg.R;
+package com.muddyfox.rgbrpg.ui;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,7 +7,14 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-public class MainMenu extends Activity
+import com.muddyfox.rgbrpg.R;
+
+/**
+ * The main menu which launches the respective activity for each item in the menu
+ * @author eldog
+ *
+ */
+public class MainMenuActivity extends Activity
 {
 	private View highScoresButton;
 	private View timeChallengeButton;
@@ -26,7 +31,7 @@ public class MainMenu extends Activity
 	{
 		public void onClick(View v)
 		{
-			Intent myIntent = new Intent(getBaseContext(), TimeChallenge.class);
+			Intent myIntent = new Intent(getBaseContext(), TimeChallengeActivity.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
 			mFadeOutAnimation
@@ -43,7 +48,7 @@ public class MainMenu extends Activity
 	{
 		public void onClick(View v)
 		{
-			Intent myIntent = new Intent(getBaseContext(), EnduranceGame.class);
+			Intent myIntent = new Intent(getBaseContext(), EnduranceGameActivity.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
 			mFadeOutAnimation
@@ -61,7 +66,7 @@ public class MainMenu extends Activity
 	{
 		public void onClick(View v)
 		{
-			Intent myIntent = new Intent(getBaseContext(), HighScore.class);
+			Intent myIntent = new Intent(getBaseContext(), HighScoreActivity.class);
 
 			v.startAnimation(mButtonFlickerAnimation);
 			mFadeOutAnimation

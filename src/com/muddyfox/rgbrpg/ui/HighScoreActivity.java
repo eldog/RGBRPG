@@ -1,4 +1,4 @@
-package com.muddyfox.rgbrpg;
+package com.muddyfox.rgbrpg.ui;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,8 +14,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.muddyfox.rgbrpg.R;
-
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Color;
@@ -27,7 +25,9 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-public class HighScore extends Activity
+import com.muddyfox.rgbrpg.R;
+
+public class HighScoreActivity extends Activity
 {
 	TableLayout highScoreTable;
 
@@ -52,7 +52,7 @@ public class HighScore extends Activity
 		private NodeList scores;
 		private NodeList ranks;
 
-		private final ProgressDialog dialog = new ProgressDialog(HighScore.this);
+		private final ProgressDialog dialog = new ProgressDialog(HighScoreActivity.this);
 
 		protected void onPreExecute()
 		{
@@ -123,23 +123,23 @@ public class HighScore extends Activity
 				for (int i = 0; i < names.getLength(); i++)
 				{
 
-					TableRow tr = new TableRow(HighScore.this);
+					TableRow tr = new TableRow(HighScoreActivity.this);
 					highScoreTable.addView(tr);
 
-					TextView rankText = new TextView(HighScore.this);
+					TextView rankText = new TextView(HighScoreActivity.this);
 					rankText.setText(ranks.item(i).getTextContent());
 					rankText.setTypeface(tf);
 					rankText.setTextColor(Color.BLACK);
 					tr.addView(rankText);
 
-					TextView nameText = new TextView(HighScore.this);
+					TextView nameText = new TextView(HighScoreActivity.this);
 					nameText.setText(names.item(i).getTextContent());
 					nameText.setTypeface(tf);
 					nameText.setTextColor(Color.BLACK);
 
 					tr.addView(nameText);
 
-					TextView scoreText = new TextView(HighScore.this);
+					TextView scoreText = new TextView(HighScoreActivity.this);
 					scoreText.setText(scores.item(i).getTextContent());
 					scoreText.setTypeface(tf);
 					scoreText.setTextColor(Color.BLACK);

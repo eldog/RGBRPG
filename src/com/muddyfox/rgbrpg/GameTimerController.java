@@ -3,13 +3,15 @@ package com.muddyfox.rgbrpg;
 import android.os.CountDownTimer;
 import android.widget.TextView;
 
+import com.muddyfox.rgbrpg.ui.TimeChallengeActivity;
+
 public class GameTimerController
 {
 	private static final int STATE_NOT_RUNNING = 0;
 	private static final int STATE_IS_RUNNING = 1;
 	private static final int STATE_FINISHED = 2;
 	private TextView timerView;
-	private TimeChallenge game;
+	private TimeChallengeActivity game;
 
 	private GameTimer gameTimer;
 
@@ -27,7 +29,7 @@ public class GameTimerController
 	{
 	}
 
-	public void initTimer(TextView view, TimeChallenge game, long millisInFuture, long countDownInterval)
+	public void initTimer(TextView view, TimeChallengeActivity game, long millisInFuture, long countDownInterval)
 	{
 		this.game = game;
 		timerView = view;
