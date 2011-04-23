@@ -169,7 +169,7 @@ public class TimeChallengeActivity extends Activity
 
     public void startGame()
     {
-        myView.setIsInGame(true);
+        myView.setAllowedToColourIn(true);
 
         timer.initTimer(timeDisplay, this, 5000, 50);
         timer.startTimer();
@@ -343,9 +343,9 @@ public class TimeChallengeActivity extends Activity
 
     public void checkScore()
     {
-        int[] scoredata = myView.getCanvasDetails();
-        calculateGameScore(scoredata[0], scoredata[1], scoredata[2],
-                scoredata[3]);
+        //int[] scoredata = myView.getCanvasDetails();
+        //calculateGameScore(scoredata[0], scoredata[1], scoredata[2],
+//        /        scoredata[3]);
     }
 
     private BattleView myView;

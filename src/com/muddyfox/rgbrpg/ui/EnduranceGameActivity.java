@@ -29,7 +29,7 @@ public class EnduranceGameActivity extends Activity
         mBattleView.setPicture(R.drawable.baby_otter_check,
                 R.drawable.baby_otter_colour_final);
         mBattleView.setCrayonColour(Color.argb(200, 206, 255, 150));
-        mBattleView.setIsInGame(true);
+        mBattleView.setAllowedToColourIn(true);
         Log.d(TAG, "End of starting game");
     }
     
@@ -37,13 +37,16 @@ public class EnduranceGameActivity extends Activity
     protected void onStart()
     {
         super.onStart();
+
+
+
+        startGame();
     }
     
     @Override
     protected void onResume()
     {
         super.onResume();
-        startGame();
     }
 
     public void showStartDialog()
