@@ -69,4 +69,18 @@ public class EnduranceGameActivity extends Activity
         AlertDialog alert = builder.create();
         alert.show();
     }
+    
+ // These are the images that get coloured, in this order.. For now
+    // TODO TURN THIS INTO A MAP
+    private static final int[] sBitmapList =
+        { Color.argb(99, 255, 156, 68), R.drawable.baby_otter_check,
+                R.drawable.baby_otter_colour_final,
+                Color.argb(99, 255, 156, 68), R.drawable.otter_check,
+                R.drawable.otter_colour_final, Color.argb(99, 68, 156, 255),
+                R.drawable.baby_wolf_check, R.drawable.baby_wolf_colour_final,
+                Color.argb(99, 68, 156, 255), R.drawable.wolf_check,
+                R.drawable.wolf_colour_final, Color.argb(99, 206, 255, 150),
+                R.drawable.owl_baby_check, R.drawable.owl_baby_colour_final,
+                Color.argb(99, 206, 224, 150), R.drawable.owl_check,
+                R.drawable.owl_final };
 }

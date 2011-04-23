@@ -19,51 +19,9 @@ import com.muddyfox.rgbrpg.R;
 public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 {
     private static final String TAG = BattleView.class.getSimpleName();
-    
-    // These are the images that get coloured, in this order.. For now
-    // TODO Add constants for all these
-    private static final int[] sBitmapList =
-        { Color.argb(99, 255, 156, 68), R.drawable.baby_otter_check,
-                R.drawable.baby_otter_colour_final,
-                Color.argb(99, 255, 156, 68), R.drawable.otter_check,
-                R.drawable.otter_colour_final, Color.argb(99, 68, 156, 255),
-                R.drawable.baby_wolf_check, R.drawable.baby_wolf_colour_final,
-                Color.argb(99, 68, 156, 255), R.drawable.wolf_check,
-                R.drawable.wolf_colour_final, Color.argb(99, 206, 255, 150),
-                R.drawable.owl_baby_check, R.drawable.owl_baby_colour_final,
-                Color.argb(99, 206, 224, 150), R.drawable.owl_check,
-                R.drawable.owl_final };
 
-    private int[] checkPixels;
-    private Canvas mCanvas;
-    private Path mPath;
-    private Paint mBitmapPaint;
-    public boolean showColourImage;
-    private Paint colourPaint;
-
-    private int dynamicInCount;
-    private int dynamicOutCount;
-    private int insideCount;
-    private int outsideCount;
-
-    public double fillPercent;
-
-    private Bitmap mDrawImage;
-    private Bitmap mBackgroundImage;
-    private Bitmap checkBitmap;
-    private Bitmap colourBitmap;
-
-    private final static int BRUSH_THICKNESS = 3;
-
-    /** Handle to the application context, used to e.g. fetch Drawables. */
-    private Context mContext;
-
-    private static final int OUTSIDE = 666;
-    private static final int LINES = 999;
-    private static final int INSIDE = 333;
-
-    /** The thread that actually draws the animation */
-    private RGBRPGThread thread;
+    /** The Thread that actually draws the colouring in action */
+    private RGBRPGThread mThread;
 
     public BattleView(Context context, AttributeSet attrs)
     {
@@ -73,81 +31,90 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         SurfaceHolder holder = getHolder();
         holder.addCallback(this);
 
-        // create thread only; it's started in surfaceCreated()
-        thread = new RGBRPGThread(holder, context);
-        
-        Log.d(TAG, "thread created");
+        // create mThread only; it's started in surfaceCreated()
+        mThread = new RGBRPGThread(holder, context);
+
+        Log.d(TAG, "mThread created");
 
         setFocusable(true); // make sure we get key events
     }
 
     class RGBRPGThread extends Thread
     {
+        private static final int COLOUR_BRUSH_THICKNESS = 3;
+        private static final int PIXEL_OUTSIDE = 666;
+        private static final int PIXEL_LINE = 999;
+        private static final int PIXEL_INSIDE = 333;
 
-        private int bitmapListIndex;
+        /** Fuel Bar constants */
+        private static final int UI_BAR = 100; // width of the bar(s)
+        private static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
+        private static final int FILL_MAX = 100;
 
-        // An array which is used to tell which bits of the bit map we've
-        // coloured already.
-        private int visitedPixels[][];
-
-        /*
-         * UI constants (i.e. the speed & fuel bars)
+        /**
+         * Handle to the application context, used to fetch Drawables and cute
+         * animals.
          */
-        public static final int UI_BAR = 100; // width of the bar(s)
-        public static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
-        public static final int FILL_MAX = 100;
-
-        private RectF mScratchRectangle;
-        private Paint progressBarPaint;
-
-        private boolean isInGame = false;
-
-        public static final int STATE_LOSE = 1;
-        public static final int STATE_PAUSE = 2;
-        public static final int STATE_READY = 3;
-        public static final int STATE_RUNNING = 4;
-        public static final int STATE_WIN = 5;
-
+        private Context mContext;
+        /** The Canvas we will be drawing to */
+        private Canvas mCanvas;
         private SurfaceHolder mSurfaceHolder;
-
         private int mCanvasHeight = 1;
         private int mCanvasWidth = 1;
-
-        /** The state of the game. One of READY, RUNNING, PAUSE, LOSE, or WIN */
-        private int mMode;
-
         /** Indicate whether the surface has been created & is ready to draw */
         private boolean mRun = false;
+
+        private Paint mColouringInPaint = new Paint();
+        private RectF mScratchRectangle = new RectF();
+        private Paint progressBarPaint = new Paint();
+        private Path mColouringPath = new Path();
+        private Paint mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+        {
+            mColouringInPaint.setAntiAlias(true);
+            mColouringInPaint.setDither(true);
+            mColouringInPaint.setStyle(Paint.Style.STROKE);
+            mColouringInPaint.setStrokeJoin(Paint.Join.ROUND);
+            mColouringInPaint.setStrokeCap(Paint.Cap.ROUND);
+            mColouringInPaint.setStrokeWidth(9);
+            mColouringInPaint.setColor(Color.RED);
+            progressBarPaint.setAntiAlias(true);
+        }
+        
+        private Bitmap mDrawImage;
+        private Bitmap mBackgroundImage;
+        private Bitmap mCheckRegionBitmap;
+        private Bitmap mCompletedColoutBitmap;
+
+        /**
+         * An array which is used to tell which bits of the bit map we've
+         * coloured already.
+         */
+        private int[][] mVisitedPixels;
+        private int[] mCheckPixels;
+        private int dynamicInCount;
+        private int dynamicOutCount;
+        private int insideCount;
+        private int outsideCount;
+
+        private double mFillPercent;
+
+        private boolean isInGame = false;
         private boolean mDrawImageProcessed;
         // This holds all the drawing together, without it everything goes nuts
         private boolean isVirgin;
-
+        private boolean mShowCompletedColourImage;
+        
+        
         public RGBRPGThread(SurfaceHolder surfaceHolder, Context context)
         {
             super();
             mSurfaceHolder = surfaceHolder;
             mContext = context;
-            mScratchRectangle = new RectF();
-
-            colourPaint = new Paint();
-            colourPaint.setAntiAlias(true);
-            colourPaint.setDither(true);
-            colourPaint.setStyle(Paint.Style.STROKE);
-            colourPaint.setStrokeJoin(Paint.Join.ROUND);
-            colourPaint.setStrokeCap(Paint.Cap.ROUND);
-            colourPaint.setStrokeWidth(9);
-            // set default colour
-            colourPaint.setColor(Color.RED);
-            progressBarPaint = new Paint();
-            progressBarPaint.setAntiAlias(true);
-            mBitmapPaint = new Paint(Paint.DITHER_FLAG);
-
-            bitmapListIndex = 0;
-            mPath = new Path();
             // Set the background bitmap
-            Bitmap temp = BitmapFactory.decodeResource(mContext.getResources(),
+            Bitmap tempBitmap = BitmapFactory.decodeResource(mContext.getResources(),
                     R.drawable.page2);
-            mBackgroundImage = temp.copy(Bitmap.Config.ARGB_8888, true);
+            // Get mutable copy so we can paint
+            mBackgroundImage = tempBitmap.copy(Bitmap.Config.ARGB_8888, true);
         }
 
         @Override
@@ -162,8 +129,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                     c = mSurfaceHolder.lockCanvas(null);
                     synchronized (mSurfaceHolder)
                     {
-                        if (mMode == STATE_RUNNING)
-                            doDraw(c);
+                        doDraw(c);
                     }
                 } finally
                 {
@@ -184,20 +150,20 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             // Draw the background image. Operations on the Canvas accumulate
             // so this is like clearing the screen.
             canvas.drawBitmap(mBackgroundImage, 0, 0, null);
-            if (!showColourImage && mDrawImageProcessed)
+            if (!mShowCompletedColourImage && mDrawImageProcessed)
             {
                 canvas.drawBitmap(mDrawImage, 0, 0, mBitmapPaint);
-                canvas.drawPath(mPath, colourPaint);
-            } else if (showColourImage)
+                canvas.drawPath(mColouringPath, mColouringInPaint);
+            } else if (mShowCompletedColourImage)
             {
-                canvas.drawBitmap(colourBitmap, 0, 0, mBitmapPaint);
+                canvas.drawBitmap(mCompletedColoutBitmap, 0, 0, mBitmapPaint);
             }
 
             mScratchRectangle.set(4, 4, 4 + UI_BAR, 4 + UI_BAR_HEIGHT);
             progressBarPaint.setColor(Color.RED);
             canvas.drawRect(mScratchRectangle, progressBarPaint);
             // draw the bar which shows how much we've "filled in"
-            int fillWidth = (int) (UI_BAR * (fillPercent / FILL_MAX));
+            int fillWidth = (int) (UI_BAR * (mFillPercent / FILL_MAX));
             mScratchRectangle.set(4, 4, 4 + fillWidth, 4 + UI_BAR_HEIGHT);
             progressBarPaint.setColor(Color.GREEN);
             canvas.drawRect(mScratchRectangle, progressBarPaint);
@@ -207,8 +173,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         /**
-         * Used to signal the thread whether it should be running or not.
-         * Passing true allows the thread to run; passing false will shut it
+         * Used to signal the mThread whether it should be running or not.
+         * Passing true allows the mThread to run; passing false will shut it
          * down if it's already running. Calling start() after this was most
          * recently called with false will result in an immediate shutdown.
          * 
@@ -217,13 +183,11 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
          */
         public void setRunning(boolean b)
         {
-            mRun = b;
-            mMode = STATE_RUNNING;
-        }
+            synchronized (mSurfaceHolder)
+            {
+                mRun = b;
+            }
 
-        public boolean isAtEndOfSequence()
-        {
-            return (bitmapListIndex > sBitmapList.length - 1);
         }
 
         /**
@@ -244,15 +208,16 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             synchronized (mSurfaceHolder)
             {
                 // Create the check bitmap bitmap from the checkResID.
-                checkBitmap = BitmapFactory.decodeResource(c.getResources(),
-                        checkResID);
+                mCheckRegionBitmap = BitmapFactory.decodeResource(c
+                        .getResources(), checkResID);
                 // Copy it to the bitmap we'll be colouring to, and make it
                 // mutable
-                mDrawImage = checkBitmap.copy(Bitmap.Config.ARGB_8888, true);
+                mDrawImage = mCheckRegionBitmap.copy(Bitmap.Config.ARGB_8888,
+                        true);
                 // Create the colour bitmap from the colourRedID
-                colourBitmap = BitmapFactory.decodeResource(c.getResources(),
-                        colourResID);
-                
+                mCompletedColoutBitmap = BitmapFactory.decodeResource(c
+                        .getResources(), colourResID);
+
             }
 
         }
@@ -264,7 +229,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         {
             synchronized (mSurfaceHolder)
             {
-                colourPaint.setColor(colour);
+                mColouringInPaint.setColor(colour);
             }
         }
 
@@ -275,13 +240,13 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         {
             synchronized (mSurfaceHolder)
             {
-                fillPercent = 0;
+                mFillPercent = 0;
                 dynamicInCount = 0;
                 dynamicOutCount = 0;
                 mDrawImageProcessed = false;
-                showColourImage = false;
+                mShowCompletedColourImage = false;
                 isVirgin = true;
-                mPath.reset();
+                mColouringPath.reset();
             }
         }
 
@@ -297,28 +262,30 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 mBackgroundImage = Bitmap.createScaledBitmap(mBackgroundImage,
                         mCanvasWidth, mCanvasHeight, true);
             }
-            if (colourBitmap != null)
+            if (mCompletedColoutBitmap != null)
             {
-                colourBitmap = Bitmap.createScaledBitmap(colourBitmap,
-                        mCanvasWidth, mCanvasHeight, true);
+                mCompletedColoutBitmap = Bitmap.createScaledBitmap(
+                        mCompletedColoutBitmap, mCanvasWidth, mCanvasHeight,
+                        true);
             }
             if (mDrawImage != null)
             {
                 mDrawImage = Bitmap.createScaledBitmap(mDrawImage,
                         mCanvasWidth, mCanvasHeight, true);
 
-                if (checkBitmap != null)
+                if (mCheckRegionBitmap != null)
                 {
-                    checkBitmap = Bitmap.createScaledBitmap(checkBitmap,
-                            mCanvasWidth, mCanvasHeight, true);
+                    mCheckRegionBitmap = Bitmap.createScaledBitmap(
+                            mCheckRegionBitmap, mCanvasWidth, mCanvasHeight,
+                            true);
                     // resize the visited pixels
-                    visitedPixels = new int[checkBitmap.getWidth()][checkBitmap
+                    mVisitedPixels = new int[mCheckRegionBitmap.getWidth()][mCheckRegionBitmap
                             .getHeight()];
                     // adjust check pixels to new surface
-                    checkPixels = bitmapGetPixels(checkBitmap);
+                    mCheckPixels = bitmapGetPixels(mCheckRegionBitmap);
                     // Create the outside regions, and remove the red.
                     bitmapSetPixels(mDrawImage,
-                            createOutsideRegions(checkPixels));
+                            createOutsideRegions(mCheckPixels));
                     mCanvas = new Canvas(mDrawImage);
 
                     mDrawImageProcessed = true;
@@ -343,8 +310,9 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             }
         }
 
-        // Process the check image and mark the pixels as OUTSIDE, INSIDE or
-        // LINES
+        // Process the check image and mark the pixels as OUTSIDE, PIXEL_INSIDE
+        // or
+        // PIXEL_LINE
         public int[] getColouringSoFar()
         {
             int[] canvasInfo =
@@ -376,12 +344,12 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                     int pixelValue = pixels[pixelIndex];
                     if (pixelValue == Color.RED)
                     {
-                        pixels[pixelIndex] = OUTSIDE;
+                        pixels[pixelIndex] = PIXEL_OUTSIDE;
                         newPixels[pixelIndex] = Color.TRANSPARENT;
                         outsideCount++;
                     } else if (pixelValue == Color.TRANSPARENT)
                     {
-                        pixels[pixelIndex] = INSIDE;
+                        pixels[pixelIndex] = PIXEL_INSIDE;
                         newPixels[pixelIndex] = pixelValue;
                         insideCount++;
                     }
@@ -390,7 +358,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                     {
                         // Now we need to get rid of all those unwanted red
                         // bits...
-                        pixels[pixelIndex] = LINES;
+                        pixels[pixelIndex] = PIXEL_LINE;
                         lineCount++;
 
                         // trim the red out
@@ -449,8 +417,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         // When the user starts pressing on the screen
         private void touch_start(float x, float y, float rX, float rY)
         {
-            mPath.reset();
-            mPath.moveTo(x, y);
+            mColouringPath.reset();
+            mColouringPath.moveTo(x, y);
             mX = x;
             mY = y;
 
@@ -466,20 +434,23 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         {
             int x = startX;
             int y = startY;
-            for (int i = x - BRUSH_THICKNESS; i <= (int) x + BRUSH_THICKNESS; i++)
+            for (int i = x - COLOUR_BRUSH_THICKNESS; i <= (int) x
+                    + COLOUR_BRUSH_THICKNESS; i++)
             {
-                for (int j = y - BRUSH_THICKNESS; j <= y + BRUSH_THICKNESS; j++)
+                for (int j = y - COLOUR_BRUSH_THICKNESS; j <= y
+                        + COLOUR_BRUSH_THICKNESS; j++)
                 {
-                    if (i >= 0 && j >= 0 && i < checkBitmap.getWidth()
-                            && j < checkBitmap.getHeight())
+                    if (i >= 0 && j >= 0 && i < mCheckRegionBitmap.getWidth()
+                            && j < mCheckRegionBitmap.getHeight())
                     {
 
-                        if (visitedPixels[i][j] != 1)
+                        if (mVisitedPixels[i][j] != 1)
                         {
                             // if it is at the moment not coloured.
                             if (mDrawImage.getPixel(i, j) == Color.TRANSPARENT)
                             {
-                                int checkColour = checkBitmap.getPixel(i, j);
+                                int checkColour = mCheckRegionBitmap.getPixel(
+                                        i, j);
 
                                 // if the check is clear, then we're in
                                 if (checkColour != Color.RED
@@ -500,7 +471,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                                     dynamicOutCount++;
                                 }
 
-                                visitedPixels[i][j] = 1;
+                                mVisitedPixels[i][j] = 1;
                             }
                         }
                     }
@@ -508,7 +479,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 }
             }
 
-            fillPercent = (dynamicInCount / (double) insideCount) * 100;
+            mFillPercent = (dynamicInCount / (double) insideCount) * 100;
         }
 
         // As the user moves their finger across the screen
@@ -519,7 +490,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE)
             {
                 // PATH DRAW
-                mPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+                mColouringPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
                 drawRawPixels((int) x, (int) y);
                 drawPathBetweenRecurs((int) mX, (int) mY, (int) x, (int) y);
                 mX = x;
@@ -547,11 +518,11 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         private void touch_up()
         {
 
-            mPath.lineTo(mX, mY);
+            mColouringPath.lineTo(mX, mY);
             // PATH DRAW
-            mCanvas.drawPath(mPath, colourPaint);
+            mCanvas.drawPath(mColouringPath, mColouringInPaint);
             // kill this so we don't double draw
-            mPath.reset();
+            mColouringPath.reset();
         }
 
         public boolean doTouchEvent(MotionEvent event)
@@ -593,7 +564,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
             }
         }
-        
+
         protected void setInGame(boolean isInGame)
         {
             synchronized (mSurfaceHolder)
@@ -606,28 +577,23 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
     public int[] getCanvasDetails()
     {
-        return thread.getColouringSoFar();
+        return mThread.getColouringSoFar();
     }
 
     public void setIsInGame(boolean isInGame)
     {
-        thread.setInGame(isInGame);
-    }
-
-    public boolean isAtEndOfSequence()
-    {
-        return thread.isAtEndOfSequence();
+        mThread.setInGame(isInGame);
     }
 
     public void reset()
     {
-        this.thread.reset();
+        this.mThread.reset();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        return thread.doTouchEvent(event);
+        return mThread.doTouchEvent(event);
     }
 
     /* Callback invoked when the surface dimensions change. */
@@ -635,40 +601,40 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             int height)
     {
         Log.d(TAG, "Surface Changed");
-        thread.setSurfaceSize(width, height);
+        mThread.setSurfaceSize(width, height);
     }
 
     public void surfaceCreated(SurfaceHolder holder)
     {
-        // start the thread here so that we don't busy-wait in run()
+        // start the mThread here so that we don't busy-wait in run()
         // waiting for the surface to be created
         Log.d(TAG, "Surface Created");
-        thread.setRunning(true);
-        thread.start();
+        mThread.setRunning(true);
+        mThread.start();
 
     }
 
     public void setPicture(int checkResID, int colourResID)
     {
-        thread.setPicture(this.getContext(), checkResID, colourResID);
+        mThread.setPicture(this.getContext(), checkResID, colourResID);
     }
 
     public void setCrayonColour(int colour)
     {
-        thread.setCrayonColour(colour);
+        mThread.setCrayonColour(colour);
     }
 
     public void surfaceDestroyed(SurfaceHolder holder)
     {
-        // we have to tell thread to shut down & wait for it to finish, or else
+        // we have to tell mThread to shut down & wait for it to finish, or else
         // it might touch the Surface after we return and explode
         boolean retry = true;
-        thread.setRunning(false);
+        mThread.setRunning(false);
         while (retry)
         {
             try
             {
-                thread.join();
+                mThread.join();
                 retry = false;
             } catch (InterruptedException e)
             {

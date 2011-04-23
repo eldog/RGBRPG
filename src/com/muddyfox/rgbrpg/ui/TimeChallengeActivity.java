@@ -178,8 +178,8 @@ public class TimeChallengeActivity extends Activity
 
     public void updatePercentage()
     {
-
-        this.fillPercentageDisplay.setText(String.format("%.1f", myView.fillPercent) + "% fill");
+        // NULL OP 
+        //this.fillPercentageDisplay.setText(String.format("%.1f", myView.fillPercent) + "% fill");
 
     }
 
@@ -205,39 +205,40 @@ public class TimeChallengeActivity extends Activity
 
     private void checkGameOver(double score)
     {
-        // If not we're still colouring
-        if (!isInGame)
-        {
-            // If we are at the end of colouring tasks
-            if (myView.isAtEndOfSequence())
-            {
-                boolean isHighscore;
-                if (currentScore > highScore)
-                {
-                    isHighscore = true;
-                    highScore = currentScore;
-                    // announce it
-                    highScoreDisplay.setText("HIGHSCORE: " + highScore);
-                    saveGame();
-
-                    Log.d("NOW", "Here I am at the BEGINNING");
-                    dialogManager.highScoreNameEntryDialog();
-
-                } else
-                {
-                    isHighscore = false;
-
-                    dialogManager.replayDialog(currentScore, isHighscore);
-                }
-            } else
-            {
-                isInGame = true;
-                // keep playing!
-                myView.reset();
-                startGame();
-            }
-            Log.d("HERE", "Here I am at the END");
-        }
+        // NULL OP
+//        // If not we're still colouring
+//        if (!isInGame)
+//        {
+//            // If we are at the end of colouring tasks
+//            if (myView.isAtEndOfSequence())
+//            {
+//                boolean isHighscore;
+//                if (currentScore > highScore)
+//                {
+//                    isHighscore = true;
+//                    highScore = currentScore;
+//                    // announce it
+//                    highScoreDisplay.setText("HIGHSCORE: " + highScore);
+//                    saveGame();
+//
+//                    Log.d("NOW", "Here I am at the BEGINNING");
+//                    dialogManager.highScoreNameEntryDialog();
+//
+//                } else
+//                {
+//                    isHighscore = false;
+//
+//                    dialogManager.replayDialog(currentScore, isHighscore);
+//                }
+//            } else
+//            {
+//                isInGame = true;
+//                // keep playing!
+//                myView.reset();
+//                startGame();
+//            }
+//            Log.d("HERE", "Here I am at the END");
+//        }
     }
 
     @Override
@@ -321,23 +322,23 @@ public class TimeChallengeActivity extends Activity
 
     public void promptShake()
     {
-        if (isRunning)
-        {
-            myView.showColourImage = true;
-            myView.invalidate();
-            Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-            vibe.vibrate(100);
-            if (shakeEnabled)
-            {
-                al.start();
-                Toast shakeItToast = Toast.makeText(this, "SHAKE IT!",
-                        Toast.LENGTH_SHORT);
-                shakeItToast.show();
-            } else
-            {
-                checkScore();
-            }
-        }
+//        if (isRunning)
+//        {
+//            myView.mShowCompletedColourImage = true;
+//            myView.invalidate();
+//            Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+//            vibe.vibrate(100);
+//            if (shakeEnabled)
+//            {
+//                al.start();
+//                Toast shakeItToast = Toast.makeText(this, "SHAKE IT!",
+//                        Toast.LENGTH_SHORT);
+//                shakeItToast.show();
+//            } else
+//            {
+//                checkScore();
+//            }
+//        }
     }
 
     public void checkScore()
