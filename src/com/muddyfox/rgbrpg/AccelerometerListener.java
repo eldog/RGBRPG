@@ -1,4 +1,4 @@
-package com.muddyFox.RGBRPG;
+package com.muddyfox.rgbrpg;
 
 import java.util.List;
 

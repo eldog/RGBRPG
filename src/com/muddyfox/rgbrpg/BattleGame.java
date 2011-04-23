@@ -1,6 +1,7 @@
-package com.muddyFox.RGBRPG;
+package com.muddyfox.rgbrpg;
 
-import com.muddyFox.RGBRPG.RGBRPGview;
+import com.muddyfox.rgbrpg.R;
+import com.muddyfox.rgbrpg.RGBRPGview;
 
 import android.app.Activity;
 import android.os.Bundle;

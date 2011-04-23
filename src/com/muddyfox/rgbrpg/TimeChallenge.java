@@ -1,4 +1,4 @@
-package com.muddyFox.RGBRPG;
+package com.muddyfox.rgbrpg;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -15,6 +15,8 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+
+import com.muddyfox.rgbrpg.R;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
