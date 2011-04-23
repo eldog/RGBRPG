@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:id="@+id/moveBar"
+  android:layout_width="wrap_content"
+  android:layout_height="wrap_content">
+  <Button
+  android:id="@+id/attack"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:text="@string/attack_button" >
+  </Button>
+  <Button
+  android:id="@+id/defend"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content"
+  android:layout_alignParentBottom="true"
+  android:text="@string/defend_button">
+  </Button>
+  <Button
+  android:id="@+id/special"
+  android:layout_width="fill_parent"
+  android:layout_height="wrap_content"
+  android:layout_alignParentBottom="true"
+  android:text="@string/attack_button">
+  </Button>
+</RelativeLayout>

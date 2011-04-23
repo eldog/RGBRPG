@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">RGBRPG Alpha Build</string>
+    <string name="app_name">RGBRPG</string>
+    <string name="attack_button">Attack</string>
+    <string name="defend_button">Defend</string>
+    <string name="special_button">Special</string>
+    <string name="time_game_start">Start Time Game</string>
+    <string name="options">Options</string>
+</resources>

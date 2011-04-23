@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	>
+	<com.muddyFox.RGBRPG.RGBRPGview
+		xmlns:android="http://schemas.android.com/apk/res/android" 
+        android:id="@+id/timeChallengeView"
+        android:layout_width="fill_parent" 
+        android:layout_height="fill_parent"/>
+    <TableLayout 
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+	  	android:layout_height="fill_parent"
+	  	android:layout_gravity="center_horizontal"
+	  	android:layout_x="0dp"
+	  	android:layout_y="20dp"
+	  	>
+	  
+	
+	 
+	 <TableRow>
+	 	<TextView
+	 	xmlns:android="http://schemas.android.com/apk/res/android"
+	 	android:id="@+id/timeChallengeScore"
+	 	android:textColor="#000"
+	 	android:layout_column="1"
+	 	android:padding="3dip"/>
+	 	<TextView
+	 	xmlns:android="http://schemas.android.com/apk/res/android"
+	 	android:id="@+id/timeChallengeHighScore"
+	 	android:textColor="#000"
+	 	android:gravity="right"
+            android:padding="3dip"/>
+            </TableRow>
+	 	 </TableLayout>
+	 	 <LinearLayout 
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="fill_parent"
+	  	android:layout_height="fill_parent"
+	  	android:layout_gravity="center_horizontal"
+	  	android:layout_x="0dp"
+	  	android:layout_y="40dp">
+	 	 <TextView
+	 	xmlns:android="http://schemas.android.com/apk/res/android"
+	 	android:id="@+id/timeChallengeTimer"
+	 	android:textColor="#000"
+	 	android:layout_width="wrap_content"
+	 	android:layout_height="wrap_content"
+	 	android:padding="3dip"
+	 	/></LinearLayout>
+	 <LinearLayout
+        android:layout_width="fill_parent"
+                          android:layout_height="fill_parent" 
+                          xmlns:android="http://schemas.android.com/apk/res/android"
+                          android:layout_x="0dp" 
+        android:layout_y="450dp" 
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+        	<TextView
+	 	xmlns:android="http://schemas.android.com/apk/res/android"
+	 	android:id="@+id/timeChallengeFillPercentage"
+	 	android:textColor="#000"
+	 	android:gravity="center_horizontal"
+	 	android:text="@string/hello"
+	 	android:layout_width="fill_parent" 
+        android:layout_height="fill_parent"
+            android:padding="3dip"/>
+        </LinearLayout>
+</AbsoluteLayout>
