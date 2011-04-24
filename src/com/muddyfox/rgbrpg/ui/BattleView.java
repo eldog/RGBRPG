@@ -15,6 +15,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.muddyfox.rgbrpg.R;
+import com.muddyfox.rgbrpg.game.Creature;
 
 public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 {
@@ -22,6 +23,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
     /** The Thread that actually draws the colouring in action */
     private BattleViewThread mThread;
+    
+    
 
     public BattleView(Context context, AttributeSet attrs)
     {
@@ -61,8 +64,10 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         private Context mContext;
 
         private SurfaceHolder mSurfaceHolder;
-        private int mCanvasHeight = 1;
-        private int mCanvasWidth = 1;
+
+        // Set to be -1 if not initialized
+        private int mCanvasHeight = -1;
+        private int mCanvasWidth = -1;
 
         /** Indicate whether the surface has been created & is ready to draw */
         private boolean mTheadRun = false;
@@ -83,6 +88,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             mProgressBarPaint.setAntiAlias(true);
         }
 
+        
         private Bitmap mLinesBitmap;
         private Bitmap mBackgroundBitmap;
         private Bitmap mCheckRegionBitmap;
@@ -211,20 +217,25 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
          *            enough. You probably want it to look somewhat like the
          *            check picture, otherwise it'll look pants.
          */
-        private void setPicture(Context c, int checkResID, int colourResID)
+        private void setPicture(int checkResID, int colourResID)
         {
             synchronized (mSurfaceHolder)
             {
                 // Create the check bitmap bitmap from the checkResID.
-                mCheckRegionBitmap = BitmapFactory.decodeResource(c
+                mCheckRegionBitmap = BitmapFactory.decodeResource(getContext()
                         .getResources(), checkResID);
                 // Copy it to the bitmap we'll be colouring to, and make it
                 // mutable
                 mLinesBitmap = mCheckRegionBitmap.copy(Bitmap.Config.ARGB_8888,
                         true);
                 // Create the colour bitmap from the colourRedID
-                mCompletedColourBitmap = BitmapFactory.decodeResource(c
+                mCompletedColourBitmap = BitmapFactory.decodeResource(getContext()
                         .getResources(), colourResID);
+                
+                if (mCanvasHeight != -1 && mCanvasWidth != -1)
+                {
+                    resizeCreatureBitmaps();
+                }
 
             }
         }
@@ -243,15 +254,15 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         /**
          * Resets or initialise the counters
          */
-        private void reset()
+        private void newGame(Creature creature)
         {
             synchronized (mSurfaceHolder)
             {
+                setPicture(creature.getReferenceDrawableId(), creature.getColourDrawableId());
+                setCrayonColour(creature.getColour());
                 mFillPercent = 0;
                 mInsidePixelsColouredInSoFar = 0;
                 mOutsidePixelsColouredInSoFar = 0;
-                mLineBitmapDeColourfied = false;
-                mShowCompletedColourImage = false;
                 mColouringPath.reset();
             }
         }
@@ -271,38 +282,43 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                             mBackgroundBitmap, mCanvasWidth, mCanvasHeight,
                             true);
                 }
-                if (mCompletedColourBitmap != null)
-                {
-                    mCompletedColourBitmap = Bitmap.createScaledBitmap(
-                            mCompletedColourBitmap, mCanvasWidth,
-                            mCanvasHeight, true);
-                }
-                if (mLinesBitmap != null)
-                {
-                    mLinesBitmap = Bitmap.createScaledBitmap(mLinesBitmap,
-                            mCanvasWidth, mCanvasHeight, true);
+                resizeCreatureBitmaps();
+                Log.d(TAG, "BG Image = " + mBackgroundBitmap.getWidth() + " x "
+                        + mBackgroundBitmap.getHeight());
+            }
+        }
 
-                    if (mCheckRegionBitmap != null)
-                    {
-                        mCheckRegionBitmap = Bitmap.createScaledBitmap(
-                                mCheckRegionBitmap, mCanvasWidth,
-                                mCanvasHeight, true);
-                        // resize the visited pixels
-                        mVisitedPixels = new int[mCheckRegionBitmap.getWidth()][mCheckRegionBitmap
-                                .getHeight()];
-                        // adjust check pixels to new surface
-                        mCheckRegionPixels = bitmapGetPixels(mCheckRegionBitmap);
-                        // Create the outside regions, and remove the red.
-                        bitmapSetPixels(mLinesBitmap,
-                                createOutsideRegions(mCheckRegionPixels));
+        private void resizeCreatureBitmaps()
+        {
+            if (mCompletedColourBitmap != null)
+            {
+                mCompletedColourBitmap = Bitmap.createScaledBitmap(
+                        mCompletedColourBitmap, mCanvasWidth, mCanvasHeight,
+                        true);
+            }
+            if (mLinesBitmap != null)
+            {
+                mLinesBitmap = Bitmap.createScaledBitmap(mLinesBitmap,
+                        mCanvasWidth, mCanvasHeight, true);
 
-                        mLineBitmapDeColourfied = true;
-                    }
-                    Log.d(TAG, "Draw Image = " + mLinesBitmap.getWidth()
-                            + " x " + mLinesBitmap.getHeight());
-                    Log.d(TAG, "BG Image = " + mBackgroundBitmap.getWidth()
-                            + " x " + mBackgroundBitmap.getHeight());
+                if (mCheckRegionBitmap != null)
+                {
+                    mCheckRegionBitmap = Bitmap.createScaledBitmap(
+                            mCheckRegionBitmap, mCanvasWidth, mCanvasHeight,
+                            true);
+                    // resize or create the visited pixels
+                    mVisitedPixels = new int[mCheckRegionBitmap.getWidth()][mCheckRegionBitmap
+                            .getHeight()];
+                    // adjust check pixels to new surface
+                    mCheckRegionPixels = bitmapGetPixels(mCheckRegionBitmap);
+                    // Create the outside regions, and remove the red.
+                    bitmapSetPixels(mLinesBitmap,
+                            createOutsideRegions(mCheckRegionPixels));
+
+                    mLineBitmapDeColourfied = true;
                 }
+                Log.d(TAG, "Draw Image = " + mLinesBitmap.getWidth() + " x "
+                        + mLinesBitmap.getHeight());
             }
         }
 
@@ -393,8 +409,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         /*
-         * We go through a double loop, creating a square, we assume transparency
-         * means that we haven't coloured that pixel yet.
+         * We go through a double loop, creating a square, we assume
+         * transparency means that we haven't coloured that pixel yet.
          */
         private void updateCurrentFillPercentFromTouch(int startX, int startY)
         {
@@ -524,6 +540,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 this.mAllowedToColourIn = allowedToColourIn;
             }
         }
+        
 
     }
 
@@ -532,9 +549,9 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         mThread.setAllowedToColourIn(allowedToColourIn);
     }
 
-    public void reset()
+    public void newGame(Creature creature)
     {
-        this.mThread.reset();
+        this.mThread.newGame(creature);
     }
 
     @Override
@@ -560,10 +577,6 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         {
             Log.d(TAG, "Old Thread terminated Creating new one");
             mThread = new BattleViewThread(getHolder(), getContext());
-            reset();
-            setPicture(R.drawable.baby_otter_check,
-                    R.drawable.baby_otter_colour_final);
-            setCrayonColour(Color.argb(200, 206, 255, 150));
             setAllowedToColourIn(true);
         }
 
@@ -577,7 +590,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
     public void setPicture(int checkResID, int colourResID)
     {
-        mThread.setPicture(this.getContext(), checkResID, colourResID);
+        mThread.setPicture(checkResID, colourResID);
     }
 
     public void setCrayonColour(int colour)
