@@ -1,6 +1,7 @@
 package com.muddyfox.rgbrpg.ui;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import android.app.Activity;
@@ -10,6 +11,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.muddyfox.rgbrpg.BattleViewListener;
 import com.muddyfox.rgbrpg.R;
 import com.muddyfox.rgbrpg.game.Creature;
 
@@ -17,20 +19,35 @@ public class EnduranceGameActivity extends Activity
 {
     private static final String TAG = EnduranceGameActivity.class
             .getSimpleName();
+    
     private BattleView mBattleView;
 
+    private Iterator<Creature> creatureListIterator;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        creatureListIterator = sCreatureList.iterator();
         setContentView(R.layout.battle_layout);
         mBattleView = (BattleView) findViewById(R.id.rgbrpgview);
     }
 
-    public void startGame()
+    public void startGame(Creature creature)
     {
         Log.d(TAG, "Start Game called");
-        mBattleView.newGame(sCreatureList.get(0));
+        mBattleView.newGame(creature);
+        mBattleView.setOnFilleCompleteListener(new BattleViewListener()
+        {
+
+            public void fillComplete()
+            {
+                if (creatureListIterator.hasNext())
+                {
+                    startGame(creatureListIterator.next());
+                }
+            }
+        });
         mBattleView.setAllowedToColourIn(true);
         Log.d(TAG, "End of starting game");
     }
@@ -39,15 +56,13 @@ public class EnduranceGameActivity extends Activity
     protected void onStart()
     {
         super.onStart();
-        //startGame();
-        showStartDialog();
+        startGame(creatureListIterator.next());
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
-        //startGame();
     }
 
     @Override
@@ -66,7 +81,7 @@ public class EnduranceGameActivity extends Activity
                         {
                             public void onClick(DialogInterface dialog, int id)
                             {
-                                startGame();
+                               // startGame();
                             }
                         }).setNegativeButton("No",
                         new DialogInterface.OnClickListener()

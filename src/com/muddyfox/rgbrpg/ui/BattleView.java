@@ -1,5 +1,8 @@
 package com.muddyfox.rgbrpg.ui;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import com.muddyfox.rgbrpg.BattleViewListener;
 import com.muddyfox.rgbrpg.R;
 import com.muddyfox.rgbrpg.game.Creature;
 
@@ -42,6 +46,13 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         // make sure we get key events
         setFocusable(true);
     }
+    
+    private Set<BattleViewListener> mFillListeners = new HashSet<BattleViewListener>();
+    
+    public void setOnFilleCompleteListener(BattleViewListener bVL)
+    {
+        mFillListeners.add(bVL);
+    }
 
     private class BattleViewThread extends Thread
     {
@@ -54,6 +65,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         private static final int UI_BAR = 100; // width of the bar(s)
         private static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
         private static final int FILL_MAX = 100;
+        
+        private static final double FILL_THRESHOLD = 90.0;
 
         private static final float TOUCH_TOLERANCE = 1.0f;
 
@@ -166,8 +179,9 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             canvas.drawBitmap(mBackgroundBitmap, 0, 0, null);
             if (!mShowCompletedColourImage && mLineBitmapDeColourfied)
             {
-                canvas.drawBitmap(mLinesBitmap, 0, 0, mBitmapPaint);
                 canvas.drawPath(mColouringPath, mColouringInPaint);
+
+                canvas.drawBitmap(mLinesBitmap, 0, 0, mBitmapPaint);
             }
             else if (mShowCompletedColourImage)
             {
@@ -454,6 +468,15 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             }
 
             mFillPercent = (mInsidePixelsColouredInSoFar / (double) mInsideCount) * 100;
+            
+            if (mFillPercent > FILL_THRESHOLD)
+            {
+                for (BattleViewListener bVL : mFillListeners)
+                {
+                    bVL.fillComplete();
+                    mFillListeners.remove(bVL);
+                }
+            }
         }
 
         // Draws a line between two points recursively
