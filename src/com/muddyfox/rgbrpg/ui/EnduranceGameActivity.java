@@ -37,9 +37,6 @@ public class EnduranceGameActivity extends Activity
     protected void onStart()
     {
         super.onStart();
-
-
-
         startGame();
     }
     
@@ -47,6 +44,12 @@ public class EnduranceGameActivity extends Activity
     protected void onResume()
     {
         super.onResume();
+    }
+    
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
     }
 
     public void showStartDialog()

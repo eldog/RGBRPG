@@ -94,8 +94,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
          */
         private int[][] mVisitedPixels;
         private int[] mCheckRegionPixels;
-        private int mDynamicInCount;
-        private int mDynamicOutCount;
+        private int mInsidePixelsColouredInSoFar;
+        private int mOutsidePixelsColouredInSoFar;
         private int mInsideCount;
         private int mOutsideCount;
 
@@ -139,7 +139,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 }
                 finally
                 {
-                    // do this in a finally so that if an exception is thrown
+                    // do this in a finally so that if an exception is
+                    // thrown
                     // during the above, we don't leave the Surface in an
                     // inconsistent state
                     if (c != null)
@@ -147,6 +148,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                         mSurfaceHolder.unlockCanvasAndPost(c);
                     }
                 }
+
             }
             Log.d(TAG, "Done Running");
         }
@@ -246,8 +248,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             synchronized (mSurfaceHolder)
             {
                 mFillPercent = 0;
-                mDynamicInCount = 0;
-                mDynamicOutCount = 0;
+                mInsidePixelsColouredInSoFar = 0;
+                mOutsidePixelsColouredInSoFar = 0;
                 mLineBitmapDeColourfied = false;
                 mShowCompletedColourImage = false;
                 mColouringPath.reset();
@@ -391,11 +393,10 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         }
 
         /*
-         * Draw colour to the drawBitmap pixels surrounding the touch coords We
-         * go through a double loop, creating a square, we assume transparency
+         * We go through a double loop, creating a square, we assume transparency
          * means that we haven't coloured that pixel yet.
          */
-        private void drawRawPixels(int startX, int startY)
+        private void updateCurrentFillPercentFromTouch(int startX, int startY)
         {
             int x = startX;
             int y = startY;
@@ -421,12 +422,12 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                                 if (checkColour != Color.RED
                                         && checkColour != Color.BLACK)
                                 {
-                                    mDynamicInCount++;
+                                    mInsidePixelsColouredInSoFar++;
                                 }
                                 // if it's red we're out.
                                 else if (checkColour == Color.RED)
                                 {
-                                    mDynamicOutCount++;
+                                    mOutsidePixelsColouredInSoFar++;
                                 }
 
                                 mVisitedPixels[i][j] = 1;
@@ -436,7 +437,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 }
             }
 
-            mFillPercent = (mDynamicInCount / (double) mInsideCount) * 100;
+            mFillPercent = (mInsidePixelsColouredInSoFar / (double) mInsideCount) * 100;
         }
 
         // Draws a line between two points recursively
@@ -445,7 +446,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             int middleX = (x1 + x2) / 2;
             int middleY = (y1 + y2) / 2;
 
-            drawRawPixels(middleX, middleY);
+            updateCurrentFillPercentFromTouch(middleX, middleY);
             if ((middleX != x1 || middleY != y1)
                     && (middleX != x2 || middleY != y2))
             {
@@ -461,7 +462,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             mX = x;
             mY = y;
 
-            drawRawPixels((int) x, (int) y);
+            updateCurrentFillPercentFromTouch((int) x, (int) y);
         }
 
         // As the user moves their finger across the screen
@@ -472,7 +473,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE)
             {
                 mColouringPath.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-                drawRawPixels((int) x, (int) y);
+                updateCurrentFillPercentFromTouch((int) x, (int) y);
                 drawPathBetweenRecurs((int) mX, (int) mY, (int) x, (int) y);
                 mX = x;
                 mY = y;
@@ -565,7 +566,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             setCrayonColour(Color.argb(200, 206, 255, 150));
             setAllowedToColourIn(true);
         }
-;
+
         if (mThread.getState() == Thread.State.NEW)
         {
             mThread.start();
