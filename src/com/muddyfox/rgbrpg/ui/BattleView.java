@@ -1,8 +1,5 @@
 package com.muddyfox.rgbrpg.ui;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,8 +24,6 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
     /** The Thread that actually draws the colouring in action */
     private BattleViewThread mThread;
-    
-    
 
     public BattleView(Context context, AttributeSet attrs)
     {
@@ -46,13 +41,8 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         // make sure we get key events
         setFocusable(true);
     }
-    
-    private Set<BattleViewListener> mFillListeners = new HashSet<BattleViewListener>();
-    
-    public void setOnFilleCompleteListener(BattleViewListener bVL)
-    {
-        mFillListeners.add(bVL);
-    }
+
+    private BattleViewListener mFillListener;
 
     private class BattleViewThread extends Thread
     {
@@ -65,7 +55,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         private static final int UI_BAR = 100; // width of the bar(s)
         private static final int UI_BAR_HEIGHT = 10; // height of the bar(s)
         private static final int FILL_MAX = 100;
-        
+
         private static final double FILL_THRESHOLD = 90.0;
 
         private static final float TOUCH_TOLERANCE = 1.0f;
@@ -101,7 +91,6 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             mProgressBarPaint.setAntiAlias(true);
         }
 
-        
         private Bitmap mLinesBitmap;
         private Bitmap mBackgroundBitmap;
         private Bitmap mCheckRegionBitmap;
@@ -243,9 +232,9 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 mLinesBitmap = mCheckRegionBitmap.copy(Bitmap.Config.ARGB_8888,
                         true);
                 // Create the colour bitmap from the colourRedID
-                mCompletedColourBitmap = BitmapFactory.decodeResource(getContext()
-                        .getResources(), colourResID);
-                
+                mCompletedColourBitmap = BitmapFactory.decodeResource(
+                        getContext().getResources(), colourResID);
+
                 if (mCanvasHeight != -1 && mCanvasWidth != -1)
                 {
                     resizeCreatureBitmaps();
@@ -268,11 +257,13 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         /**
          * Resets or initialise the counters
          */
-        private void newGame(Creature creature)
+        private void newGame(Creature creature, BattleViewListener bVL)
         {
             synchronized (mSurfaceHolder)
             {
-                setPicture(creature.getReferenceDrawableId(), creature.getColourDrawableId());
+                mFillListener = bVL;
+                setPicture(creature.getReferenceDrawableId(), creature
+                        .getColourDrawableId());
                 setCrayonColour(creature.getColour());
                 mFillPercent = 0;
                 mShowCompletedColourImage = false;
@@ -336,7 +327,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                         + mLinesBitmap.getHeight());
             }
         }
-        
+
         private void setShowCompletedColourBitmap(boolean b)
         {
             mShowCompletedColourImage = b;
@@ -474,19 +465,14 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
             }
 
             mFillPercent = (mInsidePixelsColouredInSoFar / (double) mInsideCount) * 100;
-            
-            for (BattleViewListener bVL : mFillListeners)
-            {
-                bVL.fillUpdate(mInsidePixelsColouredInSoFar, mOutsidePixelsColouredInSoFar);
-            }
-            
+
+            mFillListener.fillUpdate(mInsidePixelsColouredInSoFar,
+                    mOutsidePixelsColouredInSoFar);
+
             if (mFillPercent > FILL_THRESHOLD)
             {
-                for (BattleViewListener bVL : mFillListeners)
-                {
-                    bVL.fillComplete(mInsidePixelsColouredInSoFar, mOutsidePixelsColouredInSoFar);
-                    mFillListeners.remove(bVL);
-                }
+                mFillListener.fillComplete(mInsidePixelsColouredInSoFar,
+                        mOutsidePixelsColouredInSoFar);
             }
         }
 
@@ -531,7 +517,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 drawPathBetweenRecurs((int) mX, (int) mY, (int) x, (int) y);
                 mX = x;
                 mY = y;
-            
+
             }
         }
 
@@ -579,7 +565,6 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 this.mAllowedToColourIn = allowedToColourIn;
             }
         }
-        
 
     }
 
@@ -588,9 +573,9 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         mThread.setAllowedToColourIn(allowedToColourIn);
     }
 
-    public void newGame(Creature creature)
+    public void newGame(Creature creature, BattleViewListener bVL)
     {
-        this.mThread.newGame(creature);
+        this.mThread.newGame(creature, bVL);
     }
 
     @Override
@@ -636,7 +621,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
     {
         mThread.setCrayonColour(colour);
     }
-    
+
     public void setShowColouredInBitmap(boolean b)
     {
         mThread.setShowCompletedColourBitmap(b);

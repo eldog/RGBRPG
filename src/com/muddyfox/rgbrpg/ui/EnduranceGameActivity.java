@@ -22,7 +22,7 @@ public class EnduranceGameActivity extends Activity
 {
     private static final String TAG = EnduranceGameActivity.class
             .getSimpleName();
-    
+
     private BattleView mBattleView;
     private TextView mBattleTimerTextView;
     private TextView mBattleCurrentScoreTextView;
@@ -31,65 +31,80 @@ public class EnduranceGameActivity extends Activity
     private int totalScore = 0;
 
     private Iterator<Creature> creatureListIterator;
-    
+
     private GameTimerController mGameTimerController;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         creatureListIterator = sCreatureList.iterator();
-        mGameTimerController = new GameTimerController(5000, 10,  new GameTimerListener()
-        {
-            
-            
-            public void onTick(long millisUntilFinished)
-            {
-                mBattleTimerTextView.setText(GameTimerController.formatTime(millisUntilFinished));             
-                mBattleCurrentScoreTextView.setText(String.valueOf(currentScore));
-            }
-            
-            public void onFinish()
-            {
-                mBattleTimerTextView.setText("00:00:00");
-            }
+        mGameTimerController = new GameTimerController(5000, 10,
+                new GameTimerListener()
+                {
 
-            public void onStart()
-            {
-            }
-        });
-        
+                    public void onTick(long millisUntilFinished)
+                    {
+                        mBattleTimerTextView.setText(GameTimerController
+                                .formatTime(millisUntilFinished));
+                        mBattleCurrentScoreTextView.setText(String
+                                .valueOf(currentScore));
+                    }
+
+                    public void onFinish()
+                    {
+                        mBattleTimerTextView.setText("00:00:00");
+                    }
+
+                    public void onStart()
+                    {
+                    }
+                });
+
         setContentView(R.layout.battle_layout);
         mBattleView = (BattleView) findViewById(R.id.rgbrpgview);
         mBattleTimerTextView = (TextView) findViewById(R.id.battle_timer_text_view);
         mBattleCurrentScoreTextView = (TextView) findViewById(R.id.battle_current_score_text_view);
         mBattleTotalScoreTextView = (TextView) findViewById(R.id.battle_total_score_text_view);
-    } 
+    }
 
-    public void startGame(Creature creature)
+    private void stopGame()
+    {
+        mBattleView.setAllowedToColourIn(false);
+        mBattleView.setShowColouredInBitmap(true);
+    }
+
+    private void startGame(Creature creature)
     {
         Log.d(TAG, "Start Game called");
-        mBattleView.newGame(creature);
-        mBattleView.setOnFilleCompleteListener(new BattleViewListener()
+        mBattleView.newGame(creature, new BattleViewListener()
         {
+            private boolean mGameComplete = false;
 
             public void fillComplete(int fillIn, int fillOut)
             {
-                mBattleView.setAllowedToColourIn(false);
-                mBattleView.setShowColouredInBitmap(true);
-                updateCurrentScore(fillIn, fillOut);
-                totalScore += currentScore;
-                mBattleTotalScoreTextView.setText(String.valueOf(totalScore));
-                if (creatureListIterator.hasNext())
+                if (!mGameComplete)
                 {
-                    currentScore = 0;
-                    mGameTimerController.resetTimer();
-                    mGameTimerController.startTimer();
-                    startGame(creatureListIterator.next());
-                }
-                else
-                {
-                    // GameOver
+                    stopGame();
+
+                    updateCurrentScore(fillIn, fillOut);
+                    totalScore += currentScore;
+                    mBattleTotalScoreTextView.setText(String
+                            .valueOf(totalScore));
+
+                    if (creatureListIterator.hasNext())
+                    {
+                        currentScore = 0;
+                        mGameTimerController.resetTimer();
+                        mGameTimerController.startTimer();
+                        startGame(creatureListIterator.next());
+                    }
+                    else
+                    {
+                        // GameOver
+                    }
+                    
+                    mGameComplete = true;
                 }
             }
 
@@ -101,11 +116,11 @@ public class EnduranceGameActivity extends Activity
         mBattleView.setAllowedToColourIn(true);
         Log.d(TAG, "End of starting game");
     }
-    
+
     private void updateCurrentScore(int fillIn, int fillOut)
     {
         currentScore = fillIn - fillOut;
-        
+
     }
 
     @Override
@@ -139,7 +154,7 @@ public class EnduranceGameActivity extends Activity
                         {
                             public void onClick(DialogInterface dialog, int id)
                             {
-                               // startGame();
+                                // startGame();
                             }
                         }).setNegativeButton("No",
                         new DialogInterface.OnClickListener()
