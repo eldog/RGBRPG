@@ -28,7 +28,7 @@ public class DialogManager
                 {
                     public void onClick(DialogInterface dialog, int id)
                     {
-                        mGame.startGame();
+                        //mGame.startGame();
                     }
                 }).setNegativeButton("No",
                         new DialogInterface.OnClickListener()
@@ -61,8 +61,8 @@ public class DialogManager
                         {
                             public void onClick(DialogInterface dialog, int id)
                             {
-                                mGame.newGame();
-                                mGame.startGame();
+                               // mGame.newGame();
+                               // mGame.startGame();
                             }
                         }).setNegativeButton("No",
                         new DialogInterface.OnClickListener()
@@ -86,7 +86,7 @@ public class DialogManager
                 {
                     public void onClick(DialogInterface dialog, int id)
                     {
-                        mGame.stopAudio();
+                       // mGame.stopAudio();
                         mGame.finish();
                     }
                 }).setNegativeButton("No",
@@ -114,7 +114,7 @@ public class DialogManager
                 {
                     public void onClick(DialogInterface dialog, int whichButton)
                     {
-                        mGame.postHighscore(userName.getText().toString());
+                        //mGame.postHighscore(userName.getText().toString());
 
                         /* User clicked OK so do some stuff */
                     }

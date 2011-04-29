@@ -275,6 +275,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 setPicture(creature.getReferenceDrawableId(), creature.getColourDrawableId());
                 setCrayonColour(creature.getColour());
                 mFillPercent = 0;
+                mShowCompletedColourImage = false;
                 mInsidePixelsColouredInSoFar = 0;
                 mOutsidePixelsColouredInSoFar = 0;
                 mColouringPath.reset();
@@ -334,6 +335,11 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 Log.d(TAG, "Draw Image = " + mLinesBitmap.getWidth() + " x "
                         + mLinesBitmap.getHeight());
             }
+        }
+        
+        private void setShowCompletedColourBitmap(boolean b)
+        {
+            mShowCompletedColourImage = b;
         }
 
         private int[] createOutsideRegions(int[] pixels)
@@ -469,11 +475,16 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
 
             mFillPercent = (mInsidePixelsColouredInSoFar / (double) mInsideCount) * 100;
             
+            for (BattleViewListener bVL : mFillListeners)
+            {
+                bVL.fillUpdate(mInsidePixelsColouredInSoFar, mOutsidePixelsColouredInSoFar);
+            }
+            
             if (mFillPercent > FILL_THRESHOLD)
             {
                 for (BattleViewListener bVL : mFillListeners)
                 {
-                    bVL.fillComplete();
+                    bVL.fillComplete(mInsidePixelsColouredInSoFar, mOutsidePixelsColouredInSoFar);
                     mFillListeners.remove(bVL);
                 }
             }
@@ -507,6 +518,10 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
         // As the user moves their finger across the screen
         private void touchMove(float x, float y, float rX, float rY)
         {
+            if (mColouringPath.isEmpty())
+            {
+                mColouringPath.moveTo(x, y);
+            }
             float dx = Math.abs(x - mX);
             float dy = Math.abs(y - mY);
             if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE)
@@ -516,6 +531,7 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
                 drawPathBetweenRecurs((int) mX, (int) mY, (int) x, (int) y);
                 mX = x;
                 mY = y;
+            
             }
         }
 
@@ -619,6 +635,11 @@ public class BattleView extends SurfaceView implements SurfaceHolder.Callback
     public void setCrayonColour(int colour)
     {
         mThread.setCrayonColour(colour);
+    }
+    
+    public void setShowColouredInBitmap(boolean b)
+    {
+        mThread.setShowCompletedColourBitmap(b);
     }
 
     public void surfaceDestroyed(SurfaceHolder holder)

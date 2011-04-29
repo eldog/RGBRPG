@@ -10,8 +10,11 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.muddyfox.rgbrpg.BattleViewListener;
+import com.muddyfox.rgbrpg.GameTimerController;
+import com.muddyfox.rgbrpg.GameTimerListener;
 import com.muddyfox.rgbrpg.R;
 import com.muddyfox.rgbrpg.game.Creature;
 
@@ -21,17 +24,47 @@ public class EnduranceGameActivity extends Activity
             .getSimpleName();
     
     private BattleView mBattleView;
+    private TextView mBattleTimerTextView;
+    private TextView mBattleCurrentScoreTextView;
+    private TextView mBattleTotalScoreTextView;
+    private int currentScore = 0;
+    private int totalScore = 0;
 
     private Iterator<Creature> creatureListIterator;
+    
+    private GameTimerController mGameTimerController;
     
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         creatureListIterator = sCreatureList.iterator();
+        mGameTimerController = new GameTimerController(5000, 10,  new GameTimerListener()
+        {
+            
+            
+            public void onTick(long millisUntilFinished)
+            {
+                mBattleTimerTextView.setText(GameTimerController.formatTime(millisUntilFinished));             
+                mBattleCurrentScoreTextView.setText(String.valueOf(currentScore));
+            }
+            
+            public void onFinish()
+            {
+                mBattleTimerTextView.setText("00:00:00");
+            }
+
+            public void onStart()
+            {
+            }
+        });
+        
         setContentView(R.layout.battle_layout);
         mBattleView = (BattleView) findViewById(R.id.rgbrpgview);
-    }
+        mBattleTimerTextView = (TextView) findViewById(R.id.battle_timer_text_view);
+        mBattleCurrentScoreTextView = (TextView) findViewById(R.id.battle_current_score_text_view);
+        mBattleTotalScoreTextView = (TextView) findViewById(R.id.battle_total_score_text_view);
+    } 
 
     public void startGame(Creature creature)
     {
@@ -40,29 +73,54 @@ public class EnduranceGameActivity extends Activity
         mBattleView.setOnFilleCompleteListener(new BattleViewListener()
         {
 
-            public void fillComplete()
+            public void fillComplete(int fillIn, int fillOut)
             {
+                mBattleView.setAllowedToColourIn(false);
+                mBattleView.setShowColouredInBitmap(true);
+                updateCurrentScore(fillIn, fillOut);
+                totalScore += currentScore;
+                mBattleTotalScoreTextView.setText(String.valueOf(totalScore));
                 if (creatureListIterator.hasNext())
                 {
+                    currentScore = 0;
+                    mGameTimerController.resetTimer();
+                    mGameTimerController.startTimer();
                     startGame(creatureListIterator.next());
                 }
+                else
+                {
+                    // GameOver
+                }
+            }
+
+            public void fillUpdate(int fillIn, int fillOut)
+            {
+                updateCurrentScore(fillIn, fillOut);
             }
         });
         mBattleView.setAllowedToColourIn(true);
         Log.d(TAG, "End of starting game");
+    }
+    
+    private void updateCurrentScore(int fillIn, int fillOut)
+    {
+        currentScore = fillIn - fillOut;
+        
     }
 
     @Override
     protected void onStart()
     {
         super.onStart();
-        startGame(creatureListIterator.next());
     }
 
     @Override
     protected void onResume()
     {
         super.onResume();
+        creatureListIterator = sCreatureList.iterator();
+        startGame(creatureListIterator.next());
+        mGameTimerController.startTimer();
     }
 
     @Override

@@ -89,12 +89,12 @@ public class AccelerometerListener implements SensorEventListener
 				// Device has been shaken now go on and do something
 				// you could now inform the parent activity ...
 
-				if (!TimeChallengeActivity.isInGame)
-				{
-					this.stop();
-					parent.checkScore();
-
-				}
+//				if (!TimeChallengeActivity.isInGame)
+//				{
+//					this.stop();
+//					parent.checkScore();
+//
+//				}
 
 			}
 			last_x = current_x;
